@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ShopKart — a mini e-commerce demo. Browse gadgets, quick-view products, and check out with a slide-in cart." />
+  <title>ShopKart — Everyday tech, honest prices</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-inner">
+      <a href="#" class="logo">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/>
+        </svg>
+        <span>ShopKart</span>
+      </a>
+      <button class="cart-btn" id="cartBtn" aria-label="Open cart">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/>
+        </svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Everyday tech, honest prices</h1>
+      <p>Eight essentials, zero clutter. Free shipping over $50.</p>
+    </section>
+
+    <section class="controls" aria-label="Product filters">
+      <div class="cat-pills" id="catPills" role="group" aria-label="Filter by category"></div>
+      <select id="sortSelect" aria-label="Sort products">
+        <option value="featured">Featured</option>
+        <option value="price-asc">Price: low to high</option>
+        <option value="price-desc">Price: high to low</option>
+        <option value="rating-desc">Top rated</option>
+      </select>
+    </section>
+
+    <p class="result-count" id="resultCount" aria-live="polite"></p>
+    <section class="grid" id="grid" aria-label="Products"></section>
+  </main>
+
+  <!-- Quick view modal -->
+  <div class="modal-backdrop" id="qvBackdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="qvName">
+      <button class="modal-close" id="qvClose" aria-label="Close quick view">&times;</button>
+      <img id="qvImg" src="" alt="" />
+      <div class="modal-body">
+        <span class="badge" id="qvBadge" hidden></span>
+        <h2 id="qvName"></h2>
+        <p class="qv-rating" id="qvRating"></p>
+        <p class="qv-desc" id="qvDesc"></p>
+        <div class="qv-foot">
+          <p class="qv-price" id="qvPrice"></p>
+          <div class="qty-row">
+            <div class="qty-stepper">
+              <button id="qvMinus" aria-label="Decrease quantity">−</button>
+              <span id="qvQty">1</span>
+              <button id="qvPlus" aria-label="Increase quantity">+</button>
+            </div>
+            <button class="btn btn-primary" id="qvAdd">Add to cart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart drawer -->
+  <div class="cart-overlay" id="cartOverlay" hidden></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart" aria-hidden="true">
+    <div class="cart-head">
+      <h2>Your cart <span id="cartHeadCount"></span></h2>
+      <button class="modal-close static" id="cartClose" aria-label="Close cart">&times;</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-empty" id="cartEmpty">
+      <p class="empty-title">Your cart is empty</p>
+      <p>Add something you love to get started.</p>
+    </div>
+    <div class="cart-foot" id="cartFoot" hidden>
+      <div class="cart-total-row">
+        <span>Subtotal</span>
+        <strong id="cartTotal">$0.00</strong>
+      </div>
+      <p class="shipping-note" id="shippingNote"></p>
+      <button class="btn btn-primary btn-block btn-lg" id="checkoutBtn">Checkout</button>
+    </div>
+    <div class="order-success" id="orderSuccess" hidden>
+      <div class="success-check">&#10003;</div>
+      <h3>Order placed!</h3>
+      <p id="orderSummary"></p>
+      <button class="btn btn-ghost btn-block" id="continueShopping">Continue shopping</button>
+    </div>
+  </aside>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>ShopKart &middot; A demo storefront &middot; Photos via picsum.photos &middot; No real orders are processed</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
