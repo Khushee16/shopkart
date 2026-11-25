@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body data-page="home">
+  <a class="skip-link" href="#main">Skip to main content</a>
   <header class="site-header sticky-top">
     <nav class="navbar navbar-expand-md">
       <div class="container">
@@ -47,14 +48,16 @@
     </nav>
   </header>
 
-  <main class="container">
-    <section class="hero reveal">
+  <main class="container" id="main">
+    <section class="hero reveal" aria-label="Introduction">
+      <span class="hero-badge">Demo storefront</span>
       <h1>Everyday tech,<br />honest prices.</h1>
       <p class="lead mt-3">Eight essentials, zero clutter. Free shipping over $50, 30-day returns, and no checkout nonsense.</p>
       <div class="d-flex gap-3 mt-4 flex-wrap">
         <a href="shop.html" class="btn btn-light btn-lg">Shop all products</a>
         <a href="shop.html?cat=Audio" class="btn btn-outline-light btn-lg">Browse audio</a>
       </div>
+      <p class="hero-note">Free shipping over $50 &middot; 30-day returns &middot; Demo checkout — no real payment is taken</p>
     </section>
 
     <section class="row g-4 py-5" aria-label="Store perks">
@@ -83,7 +86,7 @@
         <h2>Featured this week</h2>
         <a href="shop.html" class="btn btn-link p-0">View all →</a>
       </div>
-      <div class="row g-4 mt-1" id="featuredGrid"></div>
+      <div class="row g-4 mt-1" id="featuredGrid" aria-busy="true"><p class="visually-hidden" role="status">Loading featured products…</p><div class="col-sm-6 col-lg-4 col-xl-3" aria-hidden="true"><div class="skeleton-card"><div class="skeleton-block skeleton-img"></div><div class="skeleton-block skeleton-line"></div><div class="skeleton-block skeleton-line short"></div></div></div><div class="col-sm-6 col-lg-4 col-xl-3" aria-hidden="true"><div class="skeleton-card"><div class="skeleton-block skeleton-img"></div><div class="skeleton-block skeleton-line"></div><div class="skeleton-block skeleton-line short"></div></div></div><div class="col-sm-6 col-lg-4 col-xl-3" aria-hidden="true"><div class="skeleton-card"><div class="skeleton-block skeleton-img"></div><div class="skeleton-block skeleton-line"></div><div class="skeleton-block skeleton-line short"></div></div></div><div class="col-sm-6 col-lg-4 col-xl-3" aria-hidden="true"><div class="skeleton-card"><div class="skeleton-block skeleton-img"></div><div class="skeleton-block skeleton-line"></div><div class="skeleton-block skeleton-line short"></div></div></div></div>
     </section>
 
     <section class="mt-5" aria-label="Shop by category">
@@ -103,6 +106,7 @@
   <footer class="site-footer">
     <div class="container">
       <p class="mb-1">ShopKart &middot; A demo storefront &middot; Photos via picsum.photos &middot; No real orders are processed</p>
+      <nav aria-label="Footer"><a href="index.html">Home</a> &middot; <a href="shop.html">Shop</a> &middot; <a href="cart.html">Cart</a></nav>
       <p class="mb-0"><small id="dataSourceNote">Loading catalog…</small></p>
     </div>
   </footer>

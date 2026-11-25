@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body data-page="shop">
+  <a class="skip-link" href="#main">Skip to main content</a>
   <header class="site-header sticky-top">
     <nav class="navbar navbar-expand-md">
       <div class="container">
@@ -47,7 +48,7 @@
     </nav>
   </header>
 
-  <main class="container">
+  <main class="container" id="main">
     <section class="pt-4 pb-2">
       <h1 class="fs-2">Shop all products</h1>
       <p class="text-muted-custom">Filter by category, search by name, or sort by price and rating.</p>
@@ -56,8 +57,10 @@
     <section class="controls d-flex flex-wrap gap-3 justify-content-between align-items-center" aria-label="Product filters">
       <div class="d-flex flex-wrap gap-2" id="catPills" role="group" aria-label="Filter by category"></div>
       <div class="d-flex gap-2 flex-wrap">
-        <input type="search" id="searchInput" class="form-control" style="max-width: 220px" placeholder="Search products…" aria-label="Search products" />
-        <select id="sortSelect" class="form-select" style="max-width: 210px" aria-label="Sort products">
+        <label class="visually-hidden" for="searchInput">Search products</label>
+        <input type="search" id="searchInput" class="form-control" style="max-width: 220px" placeholder="Search products…" aria-describedby="searchHint" />
+        <label class="visually-hidden" for="sortSelect">Sort products</label>
+        <select id="sortSelect" class="form-select" style="max-width: 210px">
           <option value="featured">Featured</option>
           <option value="price-asc">Price: low to high</option>
           <option value="price-desc">Price: high to low</option>
@@ -66,8 +69,12 @@
       </div>
     </section>
 
-    <p class="text-muted-custom small mt-3 mb-3" id="resultCount" aria-live="polite"></p>
-    <section class="row g-4 pb-2" id="grid" aria-label="Products"></section>
+    <p class="field-hint mt-2 mb-0" id="searchHint">Search matches product names, categories and descriptions.</p>
+    <div class="d-flex justify-content-between align-items-center mt-2 mb-3 flex-wrap gap-2">
+      <p class="text-muted-custom small mb-0" id="resultCount" aria-live="polite"></p>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="clearFiltersBtn">Clear search &amp; filters</button>
+    </div>
+    <section class="row g-4 pb-2" id="grid" aria-label="Products" aria-busy="true"><p class="visually-hidden" role="status">Loading products…</p><div class="col-sm-6 col-lg-4 col-xl-3" aria-hidden="true"><div class="skeleton-card"><div class="skeleton-block skeleton-img"></div><div class="skeleton-block skeleton-line"></div><div class="skeleton-block skeleton-line short"></div></div></div><div class="col-sm-6 col-lg-4 col-xl-3" aria-hidden="true"><div class="skeleton-card"><div class="skeleton-block skeleton-img"></div><div class="skeleton-block skeleton-line"></div><div class="skeleton-block skeleton-line short"></div></div></div><div class="col-sm-6 col-lg-4 col-xl-3" aria-hidden="true"><div class="skeleton-card"><div class="skeleton-block skeleton-img"></div><div class="skeleton-block skeleton-line"></div><div class="skeleton-block skeleton-line short"></div></div></div><div class="col-sm-6 col-lg-4 col-xl-3" aria-hidden="true"><div class="skeleton-card"><div class="skeleton-block skeleton-img"></div><div class="skeleton-block skeleton-line"></div><div class="skeleton-block skeleton-line short"></div></div></div></section>
   </main>
 
   <footer class="site-footer">

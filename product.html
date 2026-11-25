@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body data-page="product">
+  <a class="skip-link" href="#main">Skip to main content</a>
   <header class="site-header sticky-top">
     <nav class="navbar navbar-expand-md">
       <div class="container">
@@ -47,16 +48,22 @@
     </nav>
   </header>
 
-  <main class="container">
+  <main class="container" id="main">
     <nav aria-label="Breadcrumb" class="pt-4">
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="index.html">Home</a></li>
         <li class="breadcrumb-item"><a href="shop.html">Shop</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Product</li>
+        <li class="breadcrumb-item active" aria-current="page" id="crumbProduct">Product</li>
       </ol>
     </nav>
 
-    <section id="productDetail" class="pt-2" aria-label="Product details"></section>
+    <section id="productDetail" class="pt-2" aria-label="Product details" aria-busy="true">
+      <p class="visually-hidden" role="status">Loading product…</p>
+      <div class="row g-5" aria-hidden="true">
+        <div class="col-md-6"><div class="skeleton-card"><div class="skeleton-block skeleton-img"></div></div></div>
+        <div class="col-md-6"><div class="skeleton-card pb-3"><div class="skeleton-block skeleton-line"></div><div class="skeleton-block skeleton-line"></div><div class="skeleton-block skeleton-line short"></div></div></div>
+      </div>
+    </section>
 
     <section class="mt-5" id="relatedSection" aria-label="Related products" hidden>
       <div class="section-head reveal">

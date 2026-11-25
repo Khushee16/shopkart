@@ -27,6 +27,11 @@
   var productsSource = "embedded"; // "api" | "php" | "embedded" — shown in the footer note
   var state = { cat: "All", sort: "featured", query: "", cart: loadCart(), qvId: null, qvQty: 1 };
   var page = (document.body && document.body.getAttribute("data-page")) || "home";
+  var REDUCED_MOTION = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var lastFocused = null; // restored when the cart drawer / quick view closes
+  function scrollBehavior() { return REDUCED_MOTION ? "auto" : "smooth"; }
+  function rememberFocus() { lastFocused = document.activeElement; }
+  function restoreFocus() { if (lastFocused && document.contains(lastFocused)) lastFocused.focus(); lastFocused = null; }
 
   /* ---------- Small helpers ---------- */
   function $(id) { return document.getElementById(id); }
@@ -39,7 +44,9 @@
     return null;
   }
   function stars(p) {
-    return "★ " + p.rating.toFixed(1) + ' <span class="text-muted-custom">(' + p.reviews + " reviews)</span>";
+    return '<span aria-hidden="true">★ ' + p.rating.toFixed(1) + '</span>' +
+      '<span class="visually-hidden">Rated ' + p.rating.toFixed(1) + " out of 5 from " + p.reviews + " reviews</span>" +
+      ' <span class="text-muted-custom" aria-hidden="true">(' + p.reviews + " reviews)</span>";
   }
 
   /* ---------- Catalog loading: API -> PHP -> embedded ---------- */
@@ -124,20 +131,21 @@
         '</div>' +
         '<div class="offcanvas-body d-flex flex-column">' +
           '<div id="cartItems" class="d-flex flex-column gap-3"></div>' +
-          '<div id="cartEmpty" class="text-center py-5">' +
-            '<p class="fs-5 fw-bold mb-1">Your cart is empty</p>' +
-            '<p class="text-muted-custom">Add something you love to get started.</p>' +
-            '<a href="shop.html" class="btn btn-primary mt-2">Browse the shop</a>' +
+          '<div id="cartEmpty" class="empty-state my-3">' +
+            '<div class="empty-icon" aria-hidden="true">🛒</div>' +
+            '<p class="empty-title">Your cart is empty</p>' +
+            '<p>Add something you love to get started — orders over $50 ship free.</p>' +
+            '<a href="shop.html" class="btn btn-primary">Browse the shop</a>' +
           '</div>' +
           '<div id="cartFoot" class="mt-auto pt-3 border-top" hidden>' +
             '<div class="mb-2"><div class="d-flex justify-content-between small text-muted-custom"><span id="shipLabel"></span><span id="shipPct"></span></div>' +
-            '<div class="progress ship-progress mt-1"><div class="progress-bar" id="shipBar" role="progressbar" style="width:0%"></div></div></div>' +
+            '<div class="progress ship-progress mt-1"><div class="progress-bar" id="shipBar" role="progressbar" aria-label="Progress towards free shipping" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width:0%"></div></div></div>' +
             '<div class="d-flex justify-content-between align-items-center fs-5 mb-3"><span>Subtotal</span><strong id="cartTotal">$0.00</strong></div>' +
             '<a href="cart.html" class="btn btn-primary btn-lg w-100">Go to checkout</a>' +
           '</div>' +
         '</div>' +
       '</div>' +
-      '<div class="modal fade" id="qvModal" tabindex="-1" aria-hidden="true">' +
+      '<div class="modal fade" id="qvModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="qvName" aria-hidden="true">' +
         '<div class="modal-dialog modal-dialog-centered">' +
           '<div class="modal-content overflow-hidden">' +
             '<button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white rounded-circle p-2" style="z-index:2" id="qvClose" aria-label="Close quick view"></button>' +
@@ -150,7 +158,7 @@
               '<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 border-top pt-3">' +
                 '<span class="detail-price" id="qvPrice"></span>' +
                 '<div class="d-flex align-items-center gap-3">' +
-                  '<div class="qty-stepper"><button id="qvMinus" aria-label="Decrease quantity">−</button><span id="qvQty">1</span><button id="qvPlus" aria-label="Increase quantity">+</button></div>' +
+                  '<div class="qty-stepper"><button id="qvMinus" aria-label="Decrease quantity">−</button><span id="qvQty" aria-live="polite" aria-label="Quantity">1</span><button id="qvPlus" aria-label="Increase quantity">+</button></div>' +
                   '<button class="btn btn-primary" id="qvAdd">Add to cart</button>' +
                 '</div>' +
               '</div>' +
@@ -172,6 +180,7 @@
   function showBackdrop() { var b = $("chromeBackdrop"); if (b) { b.hidden = false; requestAnimationFrame(function () { b.classList.add("show"); }); } }
   function hideBackdrop() { var b = $("chromeBackdrop"); if (b) { b.classList.remove("show"); b.hidden = true; } }
   function openCart() {
+    rememberFocus();
     renderCartDrawer();
     var d = $("cartDrawer");
     d.classList.add("show"); d.style.visibility = "visible";
@@ -184,10 +193,12 @@
     d.classList.remove("show"); d.style.visibility = "";
     document.body.classList.remove("overflow-hidden");
     hideBackdrop();
+    restoreFocus();
   }
   function openQuickView(id) {
     var p = findProduct(id);
     if (!p) return;
+    rememberFocus();
     state.qvId = id; state.qvQty = 1;
     $("qvQty").textContent = "1";
     $("qvImg").src = imgUrl(p.seed, 900, 506);
@@ -211,6 +222,7 @@
     document.body.classList.remove("overflow-hidden");
     hideBackdrop();
     state.qvId = null;
+    restoreFocus();
   }
   function showToast(msg) {
     var body = $("cartToastBody");
@@ -245,8 +257,8 @@
             '<div class="mt-auto d-flex justify-content-between align-items-center gap-2">' +
               '<span class="product-price">' + money(p.price) + "</span>" +
               '<div class="d-flex gap-2">' +
-                '<button class="btn btn-outline-secondary btn-sm" data-qv="' + esc(p.id) + '">Quick view</button>' +
-                '<button class="btn btn-primary btn-sm" data-add="' + esc(p.id) + '">Add</button>' +
+                '<button class="btn btn-outline-secondary btn-sm" data-qv="' + esc(p.id) + '" aria-label="Quick view ' + esc(p.name) + '">Quick view</button>' +
+                '<button class="btn btn-primary btn-sm" data-add="' + esc(p.id) + '" aria-label="Add ' + esc(p.name) + ' to cart">Add</button>' +
               "</div>" +
             "</div>" +
           "</div>" +
@@ -256,7 +268,12 @@
   }
   function bindCardButtons(root) {
     root.querySelectorAll("[data-add]").forEach(function (b) {
-      b.addEventListener("click", function () { addToCart(b.getAttribute("data-add"), 1); });
+      b.addEventListener("click", function () {
+        addToCart(b.getAttribute("data-add"), 1);
+        var original = b.textContent;
+        b.textContent = "Added ✓"; b.classList.add("btn-added");
+        setTimeout(function () { b.textContent = original; b.classList.remove("btn-added"); }, 1200);
+      });
     });
     root.querySelectorAll("[data-qv]").forEach(function (b) {
       b.addEventListener("click", function () { openQuickView(b.getAttribute("data-qv")); });
@@ -264,7 +281,7 @@
   }
   function observeReveals(root) {
     var els = (root || document).querySelectorAll(".reveal:not(.in)");
-    if (!("IntersectionObserver" in window)) { els.forEach(function (el) { el.classList.add("in"); }); return; }
+    if (REDUCED_MOTION || !("IntersectionObserver" in window)) { els.forEach(function (el) { el.classList.add("in"); }); return; }
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
     }, { threshold: 0.12 });
@@ -292,7 +309,7 @@
         '<img src="' + imgUrl(p.seed, 200, 200) + '" alt="' + esc(p.name) + '" />' +
         '<div><p class="ci-name">' + esc(p.name) + '</p><p class="ci-price">' + money(p.price) + " each</p></div>" +
         '<div class="d-flex flex-column align-items-end gap-2">' +
-          '<div class="ci-qty"><button class="btn btn-outline-secondary" data-dec="' + esc(p.id) + '" aria-label="Decrease quantity">−</button><span>' + line.qty + '</span><button class="btn btn-outline-secondary" data-inc="' + esc(p.id) + '" aria-label="Increase quantity">+</button></div>' +
+          '<div class="ci-qty"><button class="btn btn-outline-secondary" data-dec="' + esc(p.id) + '" aria-label="Decrease quantity">−</button><span aria-label="Quantity ' + line.qty + '">' + line.qty + '</span><button class="btn btn-outline-secondary" data-inc="' + esc(p.id) + '" aria-label="Increase quantity">+</button></div>' +
           '<button class="ci-remove" data-rm="' + esc(p.id) + '">Remove</button>' +
         "</div>";
       items.appendChild(div);
@@ -308,6 +325,7 @@
       : "You've unlocked free shipping";
     $("shipPct").textContent = Math.min(100, Math.round((sub / FREE_SHIP) * 100)) + "%";
     $("shipBar").style.width = Math.min(100, (sub / FREE_SHIP) * 100) + "%";
+    $("shipBar").setAttribute("aria-valuenow", Math.min(100, Math.round((sub / FREE_SHIP) * 100)));
     items.querySelectorAll("[data-inc]").forEach(function (b) { b.addEventListener("click", function () { changeQty(b.getAttribute("data-inc"), 1); }); });
     items.querySelectorAll("[data-dec]").forEach(function (b) { b.addEventListener("click", function () { changeQty(b.getAttribute("data-dec"), -1); }); });
     items.querySelectorAll("[data-rm]").forEach(function (b) { b.addEventListener("click", function () { removeLine(b.getAttribute("data-rm")); }); });
@@ -318,7 +336,9 @@
     var grid = $("featuredGrid");
     if (!grid) return;
     var featured = (productsCache || EMBEDDED).filter(function (p) { return p.featured; }).slice(0, 4);
-    grid.innerHTML = featured.map(cardHtml).join("");
+    grid.removeAttribute("aria-busy");
+    grid.innerHTML = featured.length ? featured.map(cardHtml).join("")
+      : '<div class="col-12"><div class="empty-state"><div class="empty-icon" aria-hidden="true">🛍️</div><p class="empty-title">No featured products right now</p><p>The full catalog is still open — take a look at everything in the shop.</p><a href="shop.html" class="btn btn-primary">Browse the shop</a></div></div>';
     bindCardButtons(grid);
     observeReveals(grid);
     // Category tiles get live counts.
@@ -348,9 +368,15 @@
     var grid = $("grid");
     if (!grid) return;
     var list = getFiltered();
+    grid.removeAttribute("aria-busy");
     grid.innerHTML = list.length
       ? list.map(cardHtml).join("")
-      : '<div class="col-12"><div class="alert alert-light border text-center py-5">No products match that search. Try a different word or category.</div></div>';
+      : '<div class="col-12"><div class="empty-state"><div class="empty-icon" aria-hidden="true">🔍</div>' +
+        '<p class="empty-title">No products match that search</p>' +
+        '<p>Try a different word, pick another category, or clear everything to see the full catalog again.</p>' +
+        '<button type="button" class="btn btn-primary" id="emptyClearBtn">Clear search &amp; filters</button></div></div>';
+    var emptyClear = $("emptyClearBtn");
+    if (emptyClear) emptyClear.addEventListener("click", clearShopFilters);
     bindCardButtons(grid);
     observeReveals(grid);
     var rc = $("resultCount");
@@ -369,6 +395,12 @@
       wrap.appendChild(b);
     });
   }
+  function clearShopFilters() {
+    state.cat = "All"; state.query = ""; state.sort = "featured";
+    var search = $("searchInput"); if (search) search.value = "";
+    var sort = $("sortSelect"); if (sort) sort.value = "featured";
+    renderPills(); renderShop();
+  }
   function initShop() {
     var params = new URLSearchParams(window.location.search);
     var cat = params.get("cat");
@@ -378,6 +410,8 @@
     if (sort) sort.addEventListener("change", function () { state.sort = sort.value; renderShop(); });
     var search = $("searchInput");
     if (search) search.addEventListener("input", function () { state.query = search.value.trim(); renderShop(); });
+    var clearBtn = $("clearFiltersBtn");
+    if (clearBtn) clearBtn.addEventListener("click", clearShopFilters);
     renderShop();
   }
 
@@ -388,11 +422,17 @@
     var p = id ? findProduct(id) : null;
     var wrap = $("productDetail");
     if (!wrap) return;
+    wrap.removeAttribute("aria-busy");
     if (!p) {
-      wrap.innerHTML = '<div class="alert alert-warning">That product doesn\'t exist. <a href="shop.html">Back to the shop</a>.</div>';
+      wrap.innerHTML = '<div class="empty-state"><div class="empty-icon" aria-hidden="true">🧭</div>' +
+        '<p class="empty-title">That product doesn\'t exist</p>' +
+        '<p>It may have been removed from this demo catalog. The rest of the shop is still open.</p>' +
+        '<a href="shop.html" class="btn btn-primary">Back to the shop</a></div>';
       return;
     }
     document.title = p.name + " — ShopKart";
+    var crumb = $("crumbProduct");
+    if (crumb) crumb.textContent = p.name;
     var related = (productsCache || EMBEDDED).filter(function (x) { return x.category === p.category && x.id !== p.id; }).slice(0, 4);
     wrap.innerHTML =
       '<div class="row g-5">' +
@@ -450,7 +490,7 @@
         '<img src="' + imgUrl(p.seed, 200, 200) + '" alt="' + esc(p.name) + '" />' +
         '<div><p class="ci-name">' + esc(p.name) + '</p><p class="ci-price">' + money(p.price) + " each · " + money(p.price * line.qty) + "</p></div>" +
         '<div class="d-flex flex-column align-items-end gap-2">' +
-          '<div class="ci-qty"><button class="btn btn-outline-secondary" data-dec="' + esc(p.id) + '" aria-label="Decrease quantity">−</button><span>' + line.qty + '</span><button class="btn btn-outline-secondary" data-inc="' + esc(p.id) + '" aria-label="Increase quantity">+</button></div>' +
+          '<div class="ci-qty"><button class="btn btn-outline-secondary" data-dec="' + esc(p.id) + '" aria-label="Decrease quantity">−</button><span aria-label="Quantity ' + line.qty + '">' + line.qty + '</span><button class="btn btn-outline-secondary" data-inc="' + esc(p.id) + '" aria-label="Increase quantity">+</button></div>' +
           '<button class="ci-remove" data-rm="' + esc(p.id) + '">Remove</button>' +
         "</div>";
       wrap.appendChild(div);
@@ -468,7 +508,7 @@
         ? "Add " + money(remaining) + " more for free shipping."
         : "You've unlocked free shipping.";
       var bar = $("cartPageBar");
-      if (bar) bar.style.width = Math.min(100, (sub / FREE_SHIP) * 100) + "%";
+      if (bar) { bar.style.width = Math.min(100, (sub / FREE_SHIP) * 100) + "%"; bar.setAttribute("aria-valuenow", Math.min(100, Math.round((sub / FREE_SHIP) * 100))); }
     }
     var countEl = $("cartPageCount");
     if (countEl) countEl.textContent = cartQty() + (cartQty() === 1 ? " item" : " items");
@@ -517,6 +557,10 @@
       alertBox.hidden = false;
       alertBox.className = "alert alert-danger";
       alertBox.textContent = err;
+      var fieldByError = { name: "coName", email: "coEmail", address: "coAddress", city: "coCity", zip: "coZip" };
+      ["coName", "coEmail", "coAddress", "coCity", "coZip"].forEach(function (fid) { var f = $(fid); if (f) f.removeAttribute("aria-invalid"); });
+      var key = !data.name ? "name" : data.email.indexOf("@") === -1 ? "email" : !data.address ? "address" : !data.city ? "city" : !data.zip ? "zip" : null;
+      if (key && fieldByError[key]) { var bad = $(fieldByError[key]); bad.setAttribute("aria-invalid", "true"); bad.focus(); }
       return;
     }
     var btn = $("placeOrderBtn");
@@ -557,7 +601,7 @@
     var sec = $("checkoutSection");
     if (sec) sec.hidden = true;
     var success = $("orderSuccess");
-    if (success) { success.hidden = false; success.scrollIntoView({ behavior: "smooth", block: "center" }); }
+    if (success) { success.hidden = false; success.scrollIntoView({ behavior: scrollBehavior(), block: "center" }); }
   }
 
   /* ---------- Footer data-source note ---------- */
