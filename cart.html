@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ShopKart — review your cart and check out. Demo store: no real payment is taken." />
+  <title>Cart &amp; Checkout — ShopKart</title>
+  <!--
+    NOTE: The PHP backend (checkout.php / products.php) runs on a PHP host,
+    NOT on GitHub Pages. On Pages this site is static-only: the catalog falls
+    back to the built-in data in products.js and checkout shows a labelled
+    demo state. See README.md for the PHP and Node.js run instructions.
+  -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="cart">
+  <header class="site-header sticky-top">
+    <nav class="navbar navbar-expand-md">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/>
+          </svg>
+          ShopKart
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav ms-auto align-items-md-center gap-md-1">
+            <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="shop.html">Shop</a></li>
+            <li class="nav-item"><a class="nav-link active" aria-current="page" href="cart.html">Cart</a></li>
+            <li class="nav-item ms-md-2">
+              <button class="btn btn-outline-primary cart-btn" id="cartBtn" aria-label="Open cart">
+                Cart
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" id="cartCount">0</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="pt-4">
+      <h1 class="fs-2">Your cart <span class="text-muted-custom fs-5" id="cartPageCount"></span></h1>
+    </section>
+
+    <div id="cartPageEmpty" class="text-center py-5" hidden>
+      <p class="fs-5 fw-bold mb-1">Your cart is empty</p>
+      <p class="text-muted-custom">Add something you love to get started.</p>
+      <a href="shop.html" class="btn btn-primary mt-2">Browse the shop</a>
+    </div>
+
+    <div class="row g-5 mt-1">
+      <div class="col-lg-7">
+        <div id="cartPageItems"></div>
+
+        <div id="cartPageFoot" class="border-top pt-3" hidden>
+          <div class="d-flex justify-content-between small text-muted-custom">
+            <span id="cartPageShip"></span>
+          </div>
+          <div class="progress ship-progress mt-1 mb-3">
+            <div class="progress-bar" id="cartPageBar" role="progressbar" style="width:0%"></div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center fs-5">
+            <span>Subtotal</span>
+            <strong id="cartPageTotal">$0.00</strong>
+          </div>
+          <p class="text-muted-custom small mt-1 mb-0">Shipping is free over $50. No payment is taken — this is a demo store.</p>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <section id="checkoutSection" aria-label="Checkout" hidden>
+          <div class="card shadow-sm">
+            <div class="card-body p-4">
+              <h2 class="fs-5 mb-3">Checkout</h2>
+              <div class="alert alert-danger" id="checkoutAlert" role="alert" hidden></div>
+              <form id="checkoutForm" novalidate>
+                <div class="mb-3">
+                  <label for="coName" class="form-label">Full name</label>
+                  <input type="text" class="form-control" id="coName" name="name" autocomplete="name" required />
+                </div>
+                <div class="mb-3">
+                  <label for="coEmail" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="coEmail" name="email" autocomplete="email" required />
+                </div>
+                <div class="mb-3">
+                  <label for="coAddress" class="form-label">Street address</label>
+                  <input type="text" class="form-control" id="coAddress" name="address" autocomplete="street-address" required />
+                </div>
+                <div class="row g-3 mb-3">
+                  <div class="col-7">
+                    <label for="coCity" class="form-label">City</label>
+                    <input type="text" class="form-control" id="coCity" name="city" autocomplete="address-level2" required />
+                  </div>
+                  <div class="col-5">
+                    <label for="coZip" class="form-label">ZIP code</label>
+                    <input type="text" class="form-control" id="coZip" name="zip" autocomplete="postal-code" required />
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg w-100" id="placeOrderBtn">Place order</button>
+                <p class="text-muted-custom small mt-3 mb-0">
+                  Orders are stored by the backend when one is connected (Node/Express API or PHP).
+                  Without a backend, checkout shows a labelled demo state and nothing is submitted.
+                </p>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <div id="orderSuccess" class="text-center py-4" hidden>
+          <div class="order-success-check">&#10003;</div>
+          <h2 class="fs-4">Order placed!</h2>
+          <p class="text-muted-custom" id="orderSummary"></p>
+          <div class="demo-note text-start" id="demoNote" hidden></div>
+          <div class="d-flex gap-2 justify-content-center mt-3">
+            <a href="shop.html" class="btn btn-primary">Continue shopping</a>
+            <button class="btn btn-outline-secondary" id="shopAgainBtn" type="button">Dismiss</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="mb-1">ShopKart &middot; A demo storefront &middot; Photos via picsum.photos &middot; No real orders are processed</p>
+      <p class="mb-0"><small id="dataSourceNote">Loading catalog…</small></p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="products.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -3,107 +3,112 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="ShopKart — a mini e-commerce demo. Browse gadgets, quick-view products, and check out with a slide-in cart." />
+  <meta name="description" content="ShopKart — a mini e-commerce demo. Browse everyday tech, quick-view products, and check out with a slide-in cart." />
   <title>ShopKart — Everyday tech, honest prices</title>
+  <!--
+    NOTE: The PHP backend (checkout.php / products.php) runs on a PHP host,
+    NOT on GitHub Pages. On Pages this site is static-only: the catalog falls
+    back to the built-in data in products.js and checkout shows a labelled
+    demo state. See README.md for the PHP and Node.js run instructions.
+  -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <header class="site-header">
-    <div class="container nav-inner">
-      <a href="#" class="logo">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/>
-        </svg>
-        <span>ShopKart</span>
-      </a>
-      <button class="cart-btn" id="cartBtn" aria-label="Open cart">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/>
-        </svg>
-        <span class="cart-count" id="cartCount">0</span>
-      </button>
-    </div>
+<body data-page="home">
+  <header class="site-header sticky-top">
+    <nav class="navbar navbar-expand-md">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/>
+          </svg>
+          ShopKart
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav ms-auto align-items-md-center gap-md-1">
+            <li class="nav-item"><a class="nav-link active" aria-current="page" href="index.html">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="shop.html">Shop</a></li>
+            <li class="nav-item"><a class="nav-link" href="cart.html">Cart</a></li>
+            <li class="nav-item ms-md-2">
+              <button class="btn btn-outline-primary cart-btn" id="cartBtn" aria-label="Open cart">
+                Cart
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" id="cartCount">0</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
   </header>
 
   <main class="container">
-    <section class="hero">
-      <h1>Everyday tech, honest prices</h1>
-      <p>Eight essentials, zero clutter. Free shipping over $50.</p>
+    <section class="hero reveal">
+      <h1>Everyday tech,<br />honest prices.</h1>
+      <p class="lead mt-3">Eight essentials, zero clutter. Free shipping over $50, 30-day returns, and no checkout nonsense.</p>
+      <div class="d-flex gap-3 mt-4 flex-wrap">
+        <a href="shop.html" class="btn btn-light btn-lg">Shop all products</a>
+        <a href="shop.html?cat=Audio" class="btn btn-outline-light btn-lg">Browse audio</a>
+      </div>
     </section>
 
-    <section class="controls" aria-label="Product filters">
-      <div class="cat-pills" id="catPills" role="group" aria-label="Filter by category"></div>
-      <select id="sortSelect" aria-label="Sort products">
-        <option value="featured">Featured</option>
-        <option value="price-asc">Price: low to high</option>
-        <option value="price-desc">Price: high to low</option>
-        <option value="rating-desc">Top rated</option>
-      </select>
-    </section>
-
-    <p class="result-count" id="resultCount" aria-live="polite"></p>
-    <section class="grid" id="grid" aria-label="Products"></section>
-  </main>
-
-  <!-- Quick view modal -->
-  <div class="modal-backdrop" id="qvBackdrop" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="qvName">
-      <button class="modal-close" id="qvClose" aria-label="Close quick view">&times;</button>
-      <img id="qvImg" src="" alt="" />
-      <div class="modal-body">
-        <span class="badge" id="qvBadge" hidden></span>
-        <h2 id="qvName"></h2>
-        <p class="qv-rating" id="qvRating"></p>
-        <p class="qv-desc" id="qvDesc"></p>
-        <div class="qv-foot">
-          <p class="qv-price" id="qvPrice"></p>
-          <div class="qty-row">
-            <div class="qty-stepper">
-              <button id="qvMinus" aria-label="Decrease quantity">−</button>
-              <span id="qvQty">1</span>
-              <button id="qvPlus" aria-label="Increase quantity">+</button>
-            </div>
-            <button class="btn btn-primary" id="qvAdd">Add to cart</button>
-          </div>
+    <section class="row g-4 py-5" aria-label="Store perks">
+      <div class="col-md-4 reveal">
+        <div class="perk">
+          <span class="perk-icon" aria-hidden="true">🚚</span>
+          <div><h3>Free shipping over $50</h3><p>Tracked delivery on every order, no minimum fuss.</p></div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- Cart drawer -->
-  <div class="cart-overlay" id="cartOverlay" hidden></div>
-  <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart" aria-hidden="true">
-    <div class="cart-head">
-      <h2>Your cart <span id="cartHeadCount"></span></h2>
-      <button class="modal-close static" id="cartClose" aria-label="Close cart">&times;</button>
-    </div>
-    <div class="cart-items" id="cartItems"></div>
-    <div class="cart-empty" id="cartEmpty">
-      <p class="empty-title">Your cart is empty</p>
-      <p>Add something you love to get started.</p>
-    </div>
-    <div class="cart-foot" id="cartFoot" hidden>
-      <div class="cart-total-row">
-        <span>Subtotal</span>
-        <strong id="cartTotal">$0.00</strong>
+      <div class="col-md-4 reveal">
+        <div class="perk">
+          <span class="perk-icon" aria-hidden="true">↩️</span>
+          <div><h3>30-day returns</h3><p>Changed your mind? Send it back, no questions asked.</p></div>
+        </div>
       </div>
-      <p class="shipping-note" id="shippingNote"></p>
-      <button class="btn btn-primary btn-block btn-lg" id="checkoutBtn">Checkout</button>
-    </div>
-    <div class="order-success" id="orderSuccess" hidden>
-      <div class="success-check">&#10003;</div>
-      <h3>Order placed!</h3>
-      <p id="orderSummary"></p>
-      <button class="btn btn-ghost btn-block" id="continueShopping">Continue shopping</button>
-    </div>
-  </aside>
+      <div class="col-md-4 reveal">
+        <div class="perk">
+          <span class="perk-icon" aria-hidden="true">🔒</span>
+          <div><h3>Secure checkout</h3><p>Demo store — no real payment is ever taken or stored.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Featured products">
+      <div class="section-head reveal">
+        <h2>Featured this week</h2>
+        <a href="shop.html" class="btn btn-link p-0">View all →</a>
+      </div>
+      <div class="row g-4 mt-1" id="featuredGrid"></div>
+    </section>
+
+    <section class="mt-5" aria-label="Shop by category">
+      <div class="section-head reveal">
+        <h2>Shop by category</h2>
+        <p>Four shelves, eight products.</p>
+      </div>
+      <div class="row g-4 mt-1">
+        <div class="col-6 col-md-3 reveal"><a class="cat-tile" href="shop.html?cat=Audio"><span class="tile-emoji" aria-hidden="true">🎧</span><h3>Audio</h3><p data-cat-count="Audio">…</p></a></div>
+        <div class="col-6 col-md-3 reveal"><a class="cat-tile" href="shop.html?cat=Wearables"><span class="tile-emoji" aria-hidden="true">⌚</span><h3>Wearables</h3><p data-cat-count="Wearables">…</p></a></div>
+        <div class="col-6 col-md-3 reveal"><a class="cat-tile" href="shop.html?cat=Home"><span class="tile-emoji" aria-hidden="true">💡</span><h3>Home</h3><p data-cat-count="Home">…</p></a></div>
+        <div class="col-6 col-md-3 reveal"><a class="cat-tile" href="shop.html?cat=Accessories"><span class="tile-emoji" aria-hidden="true">🎒</span><h3>Accessories</h3><p data-cat-count="Accessories">…</p></a></div>
+      </div>
+    </section>
+  </main>
 
   <footer class="site-footer">
     <div class="container">
-      <p>ShopKart &middot; A demo storefront &middot; Photos via picsum.photos &middot; No real orders are processed</p>
+      <p class="mb-1">ShopKart &middot; A demo storefront &middot; Photos via picsum.photos &middot; No real orders are processed</p>
+      <p class="mb-0"><small id="dataSourceNote">Loading catalog…</small></p>
     </div>
   </footer>
 
-  <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="products.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
